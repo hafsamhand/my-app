@@ -1,18 +1,20 @@
 import { Controller, Get, UseGuards, Req } from '@nestjs/common';
-import { JwtStrategy } from '../auth/jwt.strategy';
+import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 
-@Controller('api')
-export class ExampleController {
-  @Get('public')
-  getPublic() {
-    return { message: 'Hello from public endpoint', time: new Date().toISOString() };
-  }
+interface JwtUser {
+  userId: string;
+  username?: string;
+  email?: string;
+  roles?: string[];
+}
 
-  @UseGuards(JwtStrategy)
+@Controller('example')
+export class ExampleController {
+  @UseGuards(AuthGuard('jwt'))
   @Get('protected')
-  getProtected(@Req() req: Request) {
-    const user = (req as any).user;
+  getProtected(@Req() req: Request & { user?: JwtUser }) {
+    const user = req.user;
     return { message: 'Protected data', user, secretData: '42' };
   }
 }

@@ -22,7 +22,7 @@ export class AuthController {
     if (!user) {
       return { status: 'error', message: 'Invalid credentials' };
     }
-    const token = this.authService.signPayload({ sub: user.id, email: user.email });
+    const token = this.authService.signPayload({ sub: String(user.id), email: user.email });
     // Set HttpOnly cookie
     const cookieName = process.env.COOKIE_NAME || 'jid';
     const isProd = process.env.NODE_ENV === 'production';

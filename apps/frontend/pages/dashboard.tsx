@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Router from 'next/router';
 
 export default function Dashboard() {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<unknown | null>(null);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
   useEffect(() => {
