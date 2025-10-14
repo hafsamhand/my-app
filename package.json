@@ -1,0 +1,35 @@
+{
+  "name": "monorepo-next-nest-mysql",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "install:all": "npm install --workspaces",
+    "postinstall": "echo \"Run 'npm run prisma:generate' and then start services as needed\"",
+    "prisma:generate": "cd prisma && npm install --prefix . --no-audit --no-fund || true && npx prisma generate",
+    "dev:backend": "npm --workspace @monorepo/backend run start:dev",
+    "dev:frontend": "npm --workspace @monorepo/frontend run dev",
+    "start:all": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "lint": "eslint . --ext .ts,.tsx --max-warnings=0 || true",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "prisma": "^6.17.1",
+    "eslint": "^8.40.0",
+    "prettier": "^2.8.8",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-import": "^2.27.5"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.17.1"
+  }
+}
