@@ -1,7 +1,8 @@
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Request } from 'express';
-
+import { PassportStrategy } from '@nestjs/passport';
+import { Strategy, ExtractJwt } from 'passport-jwt';
 /**
  * Simple guard that verifies the JWT from cookie.
  * Use as @UseGuards(JwtAuthGuard) on controllers/routes.
@@ -13,8 +14,22 @@ interface AuthenticatedRequest extends Request {
 }
 
 @Injectable()
-export class JwtStrategy implements CanActivate {
-  constructor(private authService: AuthService) {}
+export class JwtStrategy extends PassportStrategy(Strategy) implements CanActivate {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+  validate(payload: any): unknown {
+    const userId = payload.sub;
+    if (!userId) {
+      throw new Error('Method not implemented.');
+    }
+    return payload;
+  }
+  constructor(private authService: AuthService) {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: process.env.JWT_SECRET || 'changeme',
+    });
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<Request & { cookies?: Record<string, string> }>();

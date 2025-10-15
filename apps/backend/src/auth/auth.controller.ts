@@ -18,10 +18,15 @@ export class AuthController {
   @HttpCode(200)
   @Post('login')
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
+    console.log('here1');
     const user = await this.authService.validateUser(dto.email, dto.password);
+    console.log('here1');
+    console.log(user);
     if (!user) {
       return { status: 'error', message: 'Invalid credentials' };
     }
+    console.log('here2');
+
     const token = this.authService.signPayload({ sub: String(user.id), email: user.email });
     // Set HttpOnly cookie
     const cookieName = process.env.COOKIE_NAME || 'jid';
@@ -32,7 +37,7 @@ export class AuthController {
       sameSite: 'lax',
       maxAge: 1000 * 60 * 60, // 1 hour
     });
-    return { status: 'ok' };
+    return { status: 'ok', cookie: res.getHeader('Set-Cookie'), user };
   }
 
   @Post('logout')

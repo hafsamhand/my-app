@@ -1,14 +1,31 @@
+/* eslint-disable prettier/prettier */
 import React, { useEffect, useState } from 'react';
 import Router from 'next/router';
 
 export default function Dashboard() {
   const [data, setData] = useState<unknown | null>(null);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-
+  
   useEffect(() => {
-    fetch(`${apiUrl}/api/protected`, {
+    const token = window ? window.localStorage.getItem('accessToken') : null;
+    let accessToken = null;
+    // if (document) {
+    //   const token = decodeURIComponent(document.cookie);
+      if (token) {
+        accessToken = token ? token.split('; ')[0] : null;
+
+        console.log(accessToken);
+      }
+      console.log(token);
+    // }
+    // console.log(document);
+
+    fetch(`${apiUrl}/api/example/protected`, {
       method: 'GET',
       credentials: 'include', // send cookie
+      headers: {
+        Authorization: `Bearer ${accessToken}`, // Prepend "Bearer " to the token
+      },
     })
       .then(async (res) => {
         if (res.status === 401) {
@@ -17,6 +34,7 @@ export default function Dashboard() {
         }
         const json = await res.json();
         setData(json);
+        console.log('got in', res.status);
       })
       .catch((e) => {
         console.error(e);

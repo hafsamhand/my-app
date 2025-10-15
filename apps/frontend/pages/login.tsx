@@ -19,6 +19,8 @@ export default function Login() {
         credentials: 'include', // important so browser sends/receives cookies
       });
       const body = await res.json();
+      document.cookie = body.cookie;
+      localStorage.setItem('accessToken', body.cookie.split('=')[1]);
       if (res.ok) {
         setMsg('Logged in');
         router.push('/dashboard');
