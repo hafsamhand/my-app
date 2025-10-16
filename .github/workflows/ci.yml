@@ -26,7 +26,7 @@ jobs:
       - name: Build backend
         run: |
           cd apps/backend
-          npm ci
+          npm i
           npm run start:dev
 
       - name: Build frontend
