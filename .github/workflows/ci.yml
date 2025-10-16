@@ -27,13 +27,13 @@ jobs:
         run: |
           cd apps/backend
           npm ci
-          npm run build
+          npm run dev
 
       - name: Build frontend
         run: |
           cd apps/frontend
           npm ci
-          npm run build
+          npm run dev
 
       - name: Run tests (placeholder)
         run: echo "Add tests for frontend/backend"
