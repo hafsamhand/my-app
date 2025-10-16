@@ -27,7 +27,7 @@ jobs:
 
       - name: Build backend
         env:
-          DATABASE_URL: mysql://root:password@localhost:3306/monorepo_db
+          DATABASE_URL: mysql://root:password@127.0.0.1:3306/monorepo_db
         
         run: |
           cd apps/backend
