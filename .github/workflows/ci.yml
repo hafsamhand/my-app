@@ -26,6 +26,9 @@ jobs:
         run: npx prisma generate --schema=prisma/schema.prisma
 
       - name: Build backend
+        env:
+          DATABASE_URL: mysql://root:password@localhost:3306/monorepo_db
+        
         run: |
           cd apps/backend
           npm i
