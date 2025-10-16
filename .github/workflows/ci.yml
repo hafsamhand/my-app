@@ -25,20 +25,17 @@ jobs:
           DATABASE_URL: mysql://root:password@localhost:3306/monorepo_db
         run: npx prisma generate --schema=prisma/schema.prisma
 
-      - name: Build backend
-        env:
-          DATABASE_URL: mysql://root:password@127.0.0.1:3306/monorepo_db
-        
-        run: |
-          cd apps/backend
-          npm i
-          npm run start:dev
+      # - name: Build backend
+      #   run: |
+      #     cd apps/backend
+      #     npm ci
+      #     npm run start:dev
 
-      - name: Build frontend
-        run: |
-          cd apps/frontend
-          npm ci
-          npm run dev
+      # - name: Build frontend
+      #   run: |
+      #     cd apps/frontend
+      #     npm ci
+      #     npm run dev
 
       - name: Run tests (placeholder)
         run: echo "Add tests for frontend/backend"
