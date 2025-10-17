@@ -18,14 +18,10 @@ export class AuthController {
   @HttpCode(200)
   @Post('login')
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
-    console.log('here1');
     const user = await this.authService.validateUser(dto.email, dto.password);
-    console.log('here1');
-    console.log(user);
     if (!user) {
       return { status: 'error', message: 'Invalid credentials' };
     }
-    console.log('here2');
 
     const token = this.authService.signPayload({ sub: String(user.id), email: user.email });
     // Set HttpOnly cookie

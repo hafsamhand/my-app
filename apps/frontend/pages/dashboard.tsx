@@ -9,16 +9,9 @@ export default function Dashboard() {
   useEffect(() => {
     const token = window ? window.localStorage.getItem('accessToken') : null;
     let accessToken = null;
-    // if (document) {
-    //   const token = decodeURIComponent(document.cookie);
-      if (token) {
-        accessToken = token ? token.split('; ')[0] : null;
-
-        console.log(accessToken);
-      }
-      console.log(token);
-    // }
-    // console.log(document);
+    if (token) {
+      accessToken = token ? token.split('; ')[0] : null;      
+    }
 
     fetch(`${apiUrl}/api/example/protected`, {
       method: 'GET',
