@@ -1,7 +1,8 @@
-/* eslint-disable prettier/prettier */
 import React, { useEffect, useState } from 'react';
-export default function Home() {
-  const [userr, setUserr] = useState<{ id?: string; email?: string; username?: string } | null>(null);
+export default function Me() {
+  const [userr, setUserr] = useState<{ id?: string; email?: string; username?: string } | null>(
+    null,
+  );
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
   useEffect(() => {
     const token = window ? window.localStorage.getItem('accessToken') : null;
@@ -17,11 +18,11 @@ export default function Home() {
       },
     })
       .then((r) => r.json())
-      .then((data) => { setUserr(data.user); })
+      .then((data) => {
+        setUserr(data.user);
+      })
       .catch((e) => console.error(e));
   }, [apiUrl]);
-
-
 
   return (
     <div>

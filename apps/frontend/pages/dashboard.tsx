@@ -1,16 +1,15 @@
-/* eslint-disable prettier/prettier */
 import React, { useEffect, useState } from 'react';
 import Router from 'next/router';
 
 export default function Dashboard() {
   const [data, setData] = useState<unknown | null>(null);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-  
+
   useEffect(() => {
     const token = window ? window.localStorage.getItem('accessToken') : null;
     let accessToken = null;
     if (token) {
-      accessToken = token ? token.split('; ')[0] : null;      
+      accessToken = token ? token.split('; ')[0] : null;
     }
 
     fetch(`${apiUrl}/api/example/protected`, {
