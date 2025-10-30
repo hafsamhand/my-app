@@ -33,6 +33,8 @@ export class AuthController {
       sameSite: 'lax',
       maxAge: 1000 * 60 * 60, // 1 hour
     });
+    // We set the auth cookie as HttpOnly above. Return the Set-Cookie header in the JSON body
+    // so the original frontend flow (that reads the header) continues to work.
     return { status: 'ok', cookie: res.getHeader('Set-Cookie'), user };
   }
 

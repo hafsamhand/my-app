@@ -35,20 +35,34 @@ export default function Login() {
 
   return (
     <div>
-      <h2>Login</h2>
+      <div className="text-3xl my-12 px-3 font-bold underline">Login</div>
       <form onSubmit={submit}>
         <div>
-          <label>Email</label>
+          <label className="text-xl py-4  font-medium">Email:</label>
           <br />
-          <input value={email} onChange={(e) => setEmail(e.target.value)} />
+          <input
+            className="border border-2 my-2 border-fuchsia-700 p-2 rounded-md bg-fuchsia-100 "
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </div>
         <div>
-          <label>Password</label>
+          <label className="text-xl py-4  font-medium">Password:</label>
           <br />
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <input
+            className="border border-2 my-2 border-fuchsia-700 p-2 rounded-md bg-fuchsia-100 "
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </div>
         <div style={{ marginTop: '1rem' }}>
-          <button type="submit">Login</button>
+          <button
+            type="submit"
+            className="border p-4 text-blue-100 font-medium border-blue-900 bg-blue-900 rounded-lg"
+          >
+            Login
+          </button>
         </div>
       </form>
       <p>{msg}</p>

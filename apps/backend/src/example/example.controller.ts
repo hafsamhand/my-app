@@ -9,7 +9,7 @@ interface JwtUser {
   roles?: string[];
 }
 
-@Controller('api/example')
+@Controller('api')
 export class ExampleController {
   @UseGuards(AuthGuard('jwt'))
   @Get('protected')

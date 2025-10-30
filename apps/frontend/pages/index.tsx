@@ -10,7 +10,7 @@ export default function Home() {
     if (token) {
       accessToken = token ? token.split('; ')[0] : null;
     }
-    fetch(`${apiUrl}/api/example/public`, {
+    fetch(`${apiUrl}/api/public`, {
       method: 'GET',
       credentials: 'include', // send cookie
       headers: {
@@ -24,7 +24,7 @@ export default function Home() {
 
   return (
     <div>
-      <h1>monorepo-next-nest-mysql</h1>
+      <h1 className="p-8">monorepo-next-nest-mysql</h1>
       <p>Index page fetching a public backend endpoint:</p>
       <pre>{data ? JSON.stringify(data, null, 2) : 'Loading...'}</pre>
     </div>

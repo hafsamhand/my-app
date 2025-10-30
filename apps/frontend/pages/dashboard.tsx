@@ -12,7 +12,7 @@ export default function Dashboard() {
       accessToken = token ? token.split('; ')[0] : null;
     }
 
-    fetch(`${apiUrl}/api/example/protected`, {
+    fetch(`${apiUrl}/api/protected`, {
       method: 'GET',
       credentials: 'include', // send cookie
       headers: {
