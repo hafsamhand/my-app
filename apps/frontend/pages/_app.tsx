@@ -9,7 +9,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <header style={{ padding: '1rem', borderBottom: '1px solid #e6e6e6' }}>
         <nav>
           <Link href="/">Home</Link> | <Link href="/dashboard">Dashboard</Link> |{' '}
-          <Link href="/login">Login</Link>
+          <Link href="/me">Profile</Link> | <Link href="/login">Login</Link>
         </nav>
       </header>
       <main className="container">
