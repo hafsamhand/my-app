@@ -17,4 +17,10 @@ export class ExampleController {
     const user = req.user;
     return { message: 'Protected data', user, secretData: '42' };
   }
+  @UseGuards(AuthGuard('jwt'))
+  @Get('public')
+  getPublic(@Req() req: Request & { user?: JwtUser }) {
+    const user = req.user;
+    return { message: 'Public data', user };
+  }
 }
