@@ -15,7 +15,7 @@
     "@nestjs/core": "^10.0.0",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^10.0.0",
-    "@prisma/client": "^5.0.0",
+    "@prisma/client": "^5.22.0",
     "@types/cors": "^2.8.19",
     "bcrypt": "^5.1.0",
     "class-transformer": "^0.5.1",

@@ -1,6 +1,9 @@
 generator client {
   provider = "prisma-client-js"
-  output = "../apps/backend/node_modules/.prisma/client"
+  // Generate the client into the repository root node_modules so both
+  // the backend (when packages are hoisted) and seed scripts run from
+  // the repo root can import the generated client consistently.
+  output = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -8,9 +11,102 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum LoanStatus {
+  active
+  overdue
+  repaid
+  cancelled
+}
+
+enum SavingStatus {
+  active
+  withdrawn
+  lost
+  transferred
+}
+
+model Currency {
+  code      String @id @db.Char(3)
+  symbol    String @db.VarChar(5)
+  name      String @db.VarChar(50)
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  loans     Loan[]
+  spendings Spending[]
+  savings   Saving[]
+}
+
 model User {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  passwordHash String
-  createdAt    DateTime @default(now())
+  id           Int       @id @default(autoincrement()) @db.UnsignedInt
+  fullname     String    @db.VarChar(100)
+  username     String    @unique @db.VarChar(50)
+  email        String    @unique @db.VarChar(100)
+  password     String    @db.VarChar(255)
+  lastAccess   DateTime? @db.DateTime(0)
+  address      String?   @db.Text
+  createdAt    DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt    DateTime  @updatedAt @db.Timestamp(0)
+  deletedAt    DateTime? @db.Timestamp(0)
+  loansAsLoaner Loan[]   @relation("Loaner")
+  loansAsBorrower Loan[] @relation("Borrower")
+  spendings    Spending[]
+  savings      Saving[]
+
+  @@index([deletedAt])
+}
+
+model Loan {
+  id                  Int        @id @default(autoincrement()) @db.UnsignedInt
+  loanerId            Int        @db.UnsignedInt
+  borrowerId          Int        @db.UnsignedInt
+  amount              Decimal    @db.Decimal(15, 2)
+  currencyCode        String     @db.Char(3)
+  borrowingDate       DateTime   @db.Date
+  dueDate             DateTime   @db.Date
+  prolongementDuration Int?      @db.UnsignedInt
+  status              LoanStatus @default(active)
+  createdAt           DateTime   @default(now()) @db.Timestamp(0)
+  updatedAt           DateTime   @updatedAt @db.Timestamp(0)
+  deletedAt           DateTime?  @db.Timestamp(0)
+  loaner              User       @relation("Loaner", fields: [loanerId], references: [id], onDelete: Restrict)
+  borrower            User       @relation("Borrower", fields: [borrowerId], references: [id], onDelete: Restrict)
+  currency            Currency   @relation(fields: [currencyCode], references: [code], onUpdate: Cascade)
+
+  @@index([loanerId, deletedAt])
+  @@index([borrowerId, deletedAt])
+  @@index([currencyCode])
+}
+
+model Spending {
+  id           Int      @id @default(autoincrement()) @db.UnsignedInt
+  spenderId    Int      @db.UnsignedInt
+  amount       Decimal  @db.Decimal(15, 2)
+  currencyCode String   @db.Char(3)
+  spendingDate DateTime @db.Date
+  spentOn      String   @db.VarChar(100)
+  createdAt    DateTime @default(now()) @db.Timestamp(0)
+  deletedAt    DateTime? @db.Timestamp(0)
+  spender      User     @relation(fields: [spenderId], references: [id], onDelete: Restrict)
+  currency     Currency @relation(fields: [currencyCode], references: [code], onUpdate: Cascade)
+
+  @@index([spenderId, deletedAt])
+  @@index([currencyCode])
+}
+
+model Saving {
+  id           Int         @id @default(autoincrement()) @db.UnsignedInt
+  saverId      Int         @db.UnsignedInt
+  amount       Decimal     @db.Decimal(15, 2)
+  currencyCode String      @db.Char(3)
+  savingDate   DateTime    @db.Date
+  reason       String?     @db.VarChar(150)
+  savingPlace  String      @db.VarChar(50)
+  status       SavingStatus @default(active)
+  createdAt    DateTime    @default(now()) @db.Timestamp(0)
+  updatedAt    DateTime    @updatedAt @db.Timestamp(0)
+  deletedAt    DateTime?   @db.Timestamp(0)
+  saver        User        @relation(fields: [saverId], references: [id], onDelete: Restrict)
+  currency     Currency    @relation(fields: [currencyCode], references: [code], onUpdate: Cascade)
+
+  @@index([saverId, deletedAt])
+  @@index([currencyCode])
 }
