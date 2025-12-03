@@ -10,24 +10,42 @@ export default function App({ Component, pageProps }: AppProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex-shrink-0">
-              <Link href="/" className="text-2xl font-bold text-gray-900 hover:text-blue-600 transition-colors">
+              <Link
+                href="/"
+                className="text-2xl font-bold text-gray-900 hover:text-blue-600 transition-colors"
+              >
                 Monorepo App
               </Link>
             </div>
             <nav className="hidden md:flex space-x-8">
-              <Link href="/" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              <Link
+                href="/"
+                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
                 Home
               </Link>
-              <Link href="/dashboard" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              <Link
+                href="/dashboard"
+                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
                 Dashboard
               </Link>
-              <Link href="/me" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              <Link
+                href="/me"
+                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
                 Profile
               </Link>
-              <Link href="/login" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              <Link
+                href="/login"
+                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
                 Login
               </Link>
-              <Link href="/register" className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+              <Link
+                href="/register"
+                className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              >
                 Register
               </Link>
             </nav>
@@ -35,7 +53,12 @@ export default function App({ Component, pageProps }: AppProps) {
             <div className="md:hidden">
               <button className="text-gray-700 hover:text-blue-600 p-2">
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 </svg>
               </button>
             </div>

@@ -119,11 +119,13 @@ export default function Login() {
 
           {/* Status Message */}
           {msg && (
-            <div className={`mt-4 p-3 rounded-md text-sm ${
-              msg.includes('successfully') || msg === 'Logged in'
-                ? 'bg-green-50 text-green-800 border border-green-200'
-                : 'bg-red-50 text-red-800 border border-red-200'
-            }`}>
+            <div
+              className={`mt-4 p-3 rounded-md text-sm ${
+                msg.includes('successfully') || msg === 'Logged in'
+                  ? 'bg-green-50 text-green-800 border border-green-200'
+                  : 'bg-red-50 text-red-800 border border-red-200'
+              }`}
+            >
               {msg}
             </div>
           )}
@@ -131,8 +133,12 @@ export default function Login() {
           {/* Register Link */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
+              {/* eslint-disable-next-line react/no-unescaped-entities */}
               Don't have an account?{' '}
-              <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
+              <Link
+                href="/register"
+                className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
+              >
                 Sign up here
               </Link>
             </p>

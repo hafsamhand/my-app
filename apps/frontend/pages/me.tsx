@@ -63,9 +63,7 @@ export default function Me() {
               </SampleCard>
               <SampleCard title="Username">
                 <div className="text-center">
-                  <p className="text-lg font-medium text-gray-800">
-                    {userr.username || 'Not set'}
-                  </p>
+                  <p className="text-lg font-medium text-gray-800">{userr.username || 'Not set'}</p>
                 </div>
               </SampleCard>
             </div>
