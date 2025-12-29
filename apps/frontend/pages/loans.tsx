@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import React, { useState, useEffect } from 'react';
 import { loansApi } from '../lib/api';
 import type { Loan, CreateLoanInput } from '../types';
@@ -68,6 +69,7 @@ export default function LoansPage() {
   const handleUpdateStatus = async (id: number, newStatus: string) => {
     try {
       setError('');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const updated = await loansApi.update(id, { status: newStatus as any });
       setLoans(loans.map((l) => (l.id === id ? updated : l)));
     } catch (err) {

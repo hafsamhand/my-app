@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /**
  * API service layer for CRUD operations.
  * Provides type-safe methods for calling backend endpoints.
@@ -15,26 +16,36 @@ import {
   UpdateSavingInput,
 } from '../types';
 
+import axios from 'axios';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
-// Helper to make API calls with credentials
+const axiosInstance = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+  headers: { 'Content-Type': 'application/json' },
+});
+
 async function apiCall<T>(
   method: 'GET' | 'POST' | 'PATCH' | 'DELETE',
   endpoint: string,
-  body?: any,
+  body?: unknown,
 ): Promise<T> {
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    body: body ? JSON.stringify(body) : undefined,
-    credentials: 'include',
-  });
-  if (!response.ok) {
-    throw new Error(`API error: ${response.statusText}`);
+  try {
+    let response;
+    if (method === 'GET' || method === 'DELETE') {
+      response = await axiosInstance.request<T>({ method, url: endpoint });
+    } else {
+      response = await axiosInstance.request<T>({ method, url: endpoint, data: body });
+    }
+    return response.data;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: Error | any) {
+    if (err.response && err.response.data && err.response.data.message) {
+      throw new Error(err.response.data.message);
+    }
+    throw new Error(err.message || 'API error');
   }
-  return response.json();
 }
-
 // Loans API
 export const loansApi = {
   create: (input: CreateLoanInput): Promise<Loan> => apiCall<Loan>('POST', '/api/loans', input),
