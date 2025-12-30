@@ -8,7 +8,12 @@ export class LoansService {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   create(data: any): Promise<Loan> {
-    return this.prisma.loan.create({ data });
+    const transformedData = {
+      ...data,
+      borrowingDate: new Date(data.borrowingDate),
+      dueDate: new Date(data.dueDate),
+    };
+    return this.prisma.loan.create({ data: transformedData });
   }
 
   findAll(): Promise<Loan[]> {

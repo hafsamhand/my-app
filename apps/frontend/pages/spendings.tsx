@@ -162,7 +162,7 @@ export default function SpendingsPage() {
                   <tr key={spending.id} className="hover:bg-gray-50">
                     <td className="border px-4 py-2">{spending.id}</td>
                     <td className="border px-4 py-2">{spending.spenderId}</td>
-                    <td className="border px-4 py-2">{spending.amount.toFixed(2)}</td>
+                    <td className="border px-4 py-2">{spending.amount}</td>
                     <td className="border px-4 py-2">{spending.currencyCode}</td>
                     <td className="border px-4 py-2">{spending.spendingDate}</td>
                     <td className="border px-4 py-2">{spending.spentOn}</td>

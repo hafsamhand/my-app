@@ -7,7 +7,11 @@ export class SavingsService {
   constructor(private prisma: PrismaService) {}
 
   create(data: any): Promise<Saving> {
-    return this.prisma.saving.create({ data });
+    const transformedData = {
+      ...data,
+      savingDate: new Date(data.savingDate),
+    };
+    return this.prisma.saving.create({ data: transformedData });
   }
 
   findAll(): Promise<Saving[]> {

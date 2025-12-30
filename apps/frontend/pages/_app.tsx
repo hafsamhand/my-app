@@ -31,6 +31,18 @@ export default function App({ Component, pageProps }: AppProps) {
                 Dashboard
               </Link>
               <Link
+                href="/loans"
+                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Loans
+              </Link>
+              <Link
+                href="/spendings"
+                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Spendings
+              </Link>
+              <Link
                 href="/me"
                 className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >

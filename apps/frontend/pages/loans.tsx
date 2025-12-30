@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { loansApi } from '../lib/api';
 import type { Loan, CreateLoanInput } from '../types';
+import LoanCreate from './createLoan';
 
 export default function LoansPage() {
   const [loans, setLoans] = useState<Loan[]>([]);
@@ -95,63 +96,7 @@ export default function LoansPage() {
       </button>
 
       {showForm && (
-        <form onSubmit={handleCreateLoan} className="mb-6 p-4 bg-gray-100 rounded">
-          <div className="grid grid-cols-2 gap-4">
-            <input
-              type="number"
-              placeholder="Loaner ID"
-              value={formData.loanerId}
-              onChange={(e) => setFormData({ ...formData, loanerId: Number(e.target.value) })}
-              className="px-3 py-2 border rounded"
-              required
-            />
-            <input
-              type="number"
-              placeholder="Borrower ID"
-              value={formData.borrowerId}
-              onChange={(e) => setFormData({ ...formData, borrowerId: Number(e.target.value) })}
-              className="px-3 py-2 border rounded"
-              required
-            />
-            <input
-              type="number"
-              placeholder="Amount"
-              step="0.01"
-              value={formData.amount}
-              onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
-              className="px-3 py-2 border rounded"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Currency Code"
-              value={formData.currencyCode}
-              onChange={(e) => setFormData({ ...formData, currencyCode: e.target.value })}
-              className="px-3 py-2 border rounded"
-              required
-            />
-            <input
-              type="date"
-              value={formData.borrowingDate}
-              onChange={(e) => setFormData({ ...formData, borrowingDate: e.target.value })}
-              className="px-3 py-2 border rounded"
-              required
-            />
-            <input
-              type="date"
-              value={formData.dueDate}
-              onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-              className="px-3 py-2 border rounded"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-          >
-            Save Loan
-          </button>
-        </form>
+        <LoanCreate handleCreateLoan={handleCreateLoan} setFormData={setFormData} formData={formData} />
       )}
 
       {loading ? (
@@ -185,7 +130,7 @@ export default function LoansPage() {
                     <td className="border px-4 py-2">{loan.id}</td>
                     <td className="border px-4 py-2">{loan.loanerId}</td>
                     <td className="border px-4 py-2">{loan.borrowerId}</td>
-                    <td className="border px-4 py-2">{loan.amount.toFixed(2)}</td>
+                    <td className="border px-4 py-2">{loan.amount}</td>
                     <td className="border px-4 py-2">{loan.currencyCode}</td>
                     <td className="border px-4 py-2">{loan.borrowingDate}</td>
                     <td className="border px-4 py-2">{loan.dueDate}</td>

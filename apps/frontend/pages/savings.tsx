@@ -180,7 +180,7 @@ export default function SavingsPage() {
                   <tr key={saving.id} className="hover:bg-gray-50">
                     <td className="border px-4 py-2">{saving.id}</td>
                     <td className="border px-4 py-2">{saving.saverId}</td>
-                    <td className="border px-4 py-2">{saving.amount.toFixed(2)}</td>
+                    <td className="border px-4 py-2">{saving.amount}</td>
                     <td className="border px-4 py-2">{saving.currencyCode}</td>
                     <td className="border px-4 py-2">{saving.savingDate}</td>
                     <td className="border px-4 py-2">{saving.savingPlace}</td>
