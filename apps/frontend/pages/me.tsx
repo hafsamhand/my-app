@@ -1,103 +1,168 @@
 import React, { useEffect, useState } from 'react';
-import SampleCard from '../components/SampleCard';
+import { useRouter } from 'next/router';
+import { useAuth } from '../lib/auth';
+import Link from 'next/link';
 
 export default function Me() {
-  const [userr, setUserr] = useState<{ id?: string; email?: string; username?: string } | null>(
-    null,
-  );
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  const { user: authUser, loading: authLoading, logout } = useAuth();
+  const router = useRouter();
+  const [userData, setUserData] = useState<{
+    id?: number;
+    email?: string;
+    username?: string;
+    fullname?: string;
+    address?: string;
+    createdAt?: string;
+    lastAccess?: string;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const token = window ? window.localStorage.getItem('accessToken') : null;
-    let accessToken = null;
-    if (token) {
-      accessToken = token ? token.split('; ')[0] : null;
+    if (authLoading) {
+      return;
     }
-    fetch(`${apiUrl}/api/auth/me`, {
-      method: 'GET',
-      credentials: 'include', // send cookie
-      headers: {
-        Authorization: `Bearer ${accessToken}`, // Prepend "Bearer " to the token
-      },
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        setUserr(data.user);
-      })
-      .catch((e) => console.error(e));
-  }, [apiUrl]);
+
+    if (!authUser) {
+      router.push('/login');
+      return;
+    }
+
+    fetchUserData();
+  }, [authUser, authLoading, router]);
+
+  const fetchUserData = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const token = typeof window !== 'undefined' ? window.localStorage.getItem('accessToken') : null;
+      
+      const res = await fetch(`${apiUrl}/api/auth/me`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          Authorization: token ? `Bearer ${token}` : '',
+        },
+      });
+
+      const data = await res.json();
+      if (data.user) {
+        setUserData({
+          id: typeof data.user.sub === 'string' ? parseInt(data.user.sub, 10) : data.user.sub,
+          email: data.user.email,
+          username: data.user.username,
+          fullname: data.user.fullname,
+        });
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (authLoading || loading) {
+    return (
+      <div className="max-w-4xl mx-auto p-4 sm:p-6">
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600 text-base">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-4xl mx-auto p-4 sm:p-6">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg text-base">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-50 to-indigo-100 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            {userr ? `Welcome back, ${userr.email?.split('@')[0]}!` : 'Loading Profile...'}
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Your personal dashboard where you can manage your account and view your information.
-          </p>
-        </div>
-      </section>
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">My Profile</h1>
+        <p className="text-base sm:text-lg text-gray-600">
+          Manage your account information and preferences
+        </p>
+      </div>
 
-      {/* Profile Information Section */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Profile Information</h2>
-            <p className="text-lg text-gray-600">View and manage your account details</p>
-          </div>
-
-          {userr ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <SampleCard title="User ID">
-                <div className="text-center">
-                  <p className="text-2xl font-mono font-bold text-blue-600">{userr.id}</p>
-                </div>
-              </SampleCard>
-              <SampleCard title="Email Address">
-                <div className="text-center">
-                  <p className="text-lg font-medium text-gray-800">{userr.email}</p>
-                </div>
-              </SampleCard>
-              <SampleCard title="Username">
-                <div className="text-center">
-                  <p className="text-lg font-medium text-gray-800">
-                    {userr.username || 'Not set'}
-                  </p>
-                </div>
-              </SampleCard>
-            </div>
-          ) : (
-            <div className="text-center">
-              <div className="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-blue-500 bg-blue-100">
-                <svg
-                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                Loading profile information...
+      {userData && (
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+          {/* Profile Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-8 sm:py-12">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full flex items-center justify-center text-2xl sm:text-3xl font-bold text-blue-600">
+                {userData.email?.charAt(0).toUpperCase() || 'U'}
+              </div>
+              <div className="text-center sm:text-left text-white">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-1">
+                  {userData.fullname || userData.username || userData.email?.split('@')[0] || 'User'}
+                </h2>
+                <p className="text-blue-100 text-base sm:text-lg">{userData.email}</p>
               </div>
             </div>
-          )}
+          </div>
+
+          {/* Profile Details */}
+          <div className="p-6 sm:p-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-gray-500">User ID</label>
+                <p className="text-base text-gray-900 font-mono">{userData.id}</p>
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-gray-500">Email Address</label>
+                <p className="text-base text-gray-900">{userData.email}</p>
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-gray-500">Username</label>
+                <p className="text-base text-gray-900">{userData.username || 'Not set'}</p>
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-gray-500">Full Name</label>
+                <p className="text-base text-gray-900">{userData.fullname || 'Not set'}</p>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="mt-8 pt-8 border-t border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Link
+                  href="/loans"
+                  className="flex items-center justify-center px-4 py-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors text-base font-medium"
+                >
+                  View Loans
+                </Link>
+                <Link
+                  href="/spendings"
+                  className="flex items-center justify-center px-4 py-3 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors text-base font-medium"
+                >
+                  View Spendings
+                </Link>
+                <Link
+                  href="/savings"
+                  className="flex items-center justify-center px-4 py-3 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors text-base font-medium"
+                >
+                  View Savings
+                </Link>
+                <button
+                  onClick={logout}
+                  className="flex items-center justify-center px-4 py-3 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors text-base font-medium"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </section>
+      )}
     </div>
   );
 }

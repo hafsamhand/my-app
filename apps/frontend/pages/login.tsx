@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { useAuth } from '../lib/auth';
 
 export default function Login() {
   const [email, setEmail] = useState('alice@example.com');
@@ -8,43 +9,32 @@ export default function Login() {
   const [msg, setMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  const { login } = useAuth();
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setIsLoading(true);
     setMsg('Logging in...');
     try {
-      const res = await fetch(`${apiUrl}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include', // important so browser sends/receives cookies
-      });
-      const body = await res.json();
-      document.cookie = body.cookie;
-      localStorage.setItem('accessToken', body.cookie.split('=')[1]);
-      if (res.ok) {
-        setMsg('Logged in successfully!');
-        setTimeout(() => router.push('/dashboard'), 1000);
-      } else {
-        setMsg(body?.message || 'Login failed');
-      }
+      await login(email, password);
+      setMsg('Logged in successfully!');
+      setTimeout(() => router.push('/dashboard'), 500);
     } catch (err) {
-      console.error(err);
-      setMsg('Network error');
+      const errorMessage = err instanceof Error ? err.message : 'Login failed';
+      setMsg(errorMessage);
+      console.error('Login error:', err);
     } finally {
       setIsLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-6 sm:space-y-8">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-          <p className="text-lg text-gray-600">Sign in to your account</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+          <p className="text-base sm:text-lg text-gray-600">Sign in to your account</p>
         </div>
 
         {/* Login Form */}
@@ -119,11 +109,13 @@ export default function Login() {
 
           {/* Status Message */}
           {msg && (
-            <div className={`mt-4 p-3 rounded-md text-sm ${
-              msg.includes('successfully') || msg === 'Logged in'
-                ? 'bg-green-50 text-green-800 border border-green-200'
-                : 'bg-red-50 text-red-800 border border-red-200'
-            }`}>
+            <div
+              className={`mt-4 p-3 rounded-md text-sm ${
+                msg.includes('successfully') || msg === 'Logged in'
+                  ? 'bg-green-50 text-green-800 border border-green-200'
+                  : 'bg-red-50 text-red-800 border border-red-200'
+              }`}
+            >
               {msg}
             </div>
           )}
@@ -131,8 +123,12 @@ export default function Login() {
           {/* Register Link */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
+              {/* eslint-disable-next-line react/no-unescaped-entities */}
               Don't have an account?{' '}
-              <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
+              <Link
+                href="/register"
+                className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
+              >
                 Sign up here
               </Link>
             </p>
