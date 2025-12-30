@@ -55,7 +55,7 @@ export interface Spending {
 }
 
 export interface CreateSpendingInput {
-  spenderId: number;
+  spenderId?: number;
   amount: number;
   currencyCode: string;
   spendingDate: string;
@@ -85,7 +85,7 @@ export interface Saving {
 }
 
 export interface CreateSavingInput {
-  saverId: number;
+  saverId?: number;
   amount: number;
   currencyCode: string;
   savingDate: string;
