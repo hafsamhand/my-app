@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from '../lib/auth';
 
 function Nav() {
   const { user, logout } = useAuth();
+  const userIcon = '👤';
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
@@ -20,37 +21,37 @@ function Nav() {
             </Link>
           </div>
           <nav className="hidden md:flex space-x-4 lg:space-x-8 items-center">
-            <Link
-              href="/"
-              className="text-gray-700 hover:text-blue-600 px-2 lg:px-3 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/loans"
-              className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              Loans
-            </Link>
-            <Link
-              href="/spendings"
-              className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              Spendings
-            </Link>
-            <Link
-              href="/savings"
-              className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              Savings
-            </Link>
             {user ? (
               <>
                 <Link
-                  href="/me"
+                  href="/"
+                  className="text-gray-700 hover:text-blue-600 px-2 lg:px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  href="/loans"
                   className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
-                  {user.email}
+                  Loans
+                </Link>
+                <Link
+                  href="/spendings"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  Spendings
+                </Link>
+                <Link
+                  href="/savings"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  Savings
+                </Link>
+                <Link
+                  href="/me"
+                  className="text-gray-700 bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  {userIcon} {user.fullname || user.email?.split('@')[0]}
                 </Link>
                 <button
                   onClick={logout}
