@@ -1,30 +1,48 @@
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { useAuth } from '../lib/auth';
 import { savingsApi } from '../lib/api';
-import type { Saving, CreateSavingInput } from '../types';
+import type { Saving, CreateSavingInput, SavingStatus } from '../types';
 
 export default function SavingsPage() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [savings, setSavings] = useState<Saving[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [filters, setFilters] = useState<{
+    status?: SavingStatus;
+    currencyCode?: string;
+    startDate?: string;
+    endDate?: string;
+    savingPlace?: string;
+  }>({});
   const [formData, setFormData] = useState<CreateSavingInput>({
-    saverId: 1,
     amount: 0,
     currencyCode: 'USD',
     savingDate: '',
     savingPlace: '',
   });
 
-  // Fetch all savings on mount
   useEffect(() => {
+    if (authLoading) {
+      return; // Wait for auth to finish loading
+    }
+
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
     fetchSavings();
-  }, []);
+  }, [user, authLoading, router, filters]);
 
   const fetchSavings = async () => {
     try {
       setLoading(true);
       setError('');
-      const data = await savingsApi.findAll();
+      const data = await savingsApi.findAll(filters);
       setSavings(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch savings');
@@ -38,9 +56,8 @@ export default function SavingsPage() {
     try {
       setError('');
       const newSaving = await savingsApi.create(formData);
-      setSavings([...savings, newSaving]);
+      setSavings([newSaving, ...savings]);
       setFormData({
-        saverId: 1,
         amount: 0,
         currencyCode: 'USD',
         savingDate: '',
@@ -51,6 +68,20 @@ export default function SavingsPage() {
       setError(err instanceof Error ? err.message : 'Failed to create saving');
     }
   };
+
+  const clearFilters = () => {
+    setFilters({});
+  };
+
+  if (authLoading) {
+    return (
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
 
   const handleDeleteSaving = async (id: number) => {
     if (!confirm('Delete this saving?')) return;
@@ -63,10 +94,10 @@ export default function SavingsPage() {
     }
   };
 
-  const handleUpdateStatus = async (id: number, newStatus: string) => {
+  const handleUpdateStatus = async (id: number, newStatus: SavingStatus) => {
     try {
       setError('');
-      const updated = await savingsApi.update(id, { status: newStatus as any });
+      const updated = await savingsApi.update(id, { status: newStatus });
       setSavings(savings.map((s) => (s.id === id ? updated : s)));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update saving');
@@ -74,142 +105,225 @@ export default function SavingsPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <h1 className="text-4xl font-bold mb-6">Savings Management</h1>
+    <div className="max-w-7xl mx-auto p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-4xl font-bold">Savings Management</h1>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+        >
+          {showForm ? 'Cancel' : '+ Create Saving'}
+        </button>
+      </div>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
           {error}
         </div>
       )}
 
-      <button
-        onClick={() => setShowForm(!showForm)}
-        className="mb-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-      >
-        {showForm ? 'Cancel' : 'Create Saving'}
-      </button>
-
-      {showForm && (
-        <form onSubmit={handleCreateSaving} className="mb-6 p-4 bg-gray-100 rounded">
-          <div className="grid grid-cols-2 gap-4">
-            <input
-              type="number"
-              placeholder="Saver ID"
-              value={formData.saverId}
-              onChange={(e) => setFormData({ ...formData, saverId: Number(e.target.value) })}
-              className="px-3 py-2 border rounded"
-              required
-            />
-            <input
-              type="number"
-              placeholder="Amount"
-              step="0.01"
-              value={formData.amount}
-              onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
-              className="px-3 py-2 border rounded"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Currency Code"
-              value={formData.currencyCode}
-              onChange={(e) => setFormData({ ...formData, currencyCode: e.target.value })}
-              className="px-3 py-2 border rounded"
-              required
-            />
+      {/* Filters */}
+      <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+        <h3 className="text-lg font-semibold mb-3">Filters</h3>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <select
+            value={filters.status || ''}
+            onChange={(e) =>
+              setFilters({ ...filters, status: e.target.value as SavingStatus || undefined })
+            }
+            className="px-3 py-2 border rounded-lg"
+          >
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="withdrawn">Withdrawn</option>
+            <option value="lost">Lost</option>
+            <option value="transferred">Transferred</option>
+          </select>
+          <input
+            type="text"
+            placeholder="Currency Code"
+            value={filters.currencyCode || ''}
+            onChange={(e) => setFilters({ ...filters, currencyCode: e.target.value || undefined })}
+            className="px-3 py-2 border rounded-lg"
+          />
+          <input
+            type="date"
+            placeholder="Start Date"
+            value={filters.startDate || ''}
+            onChange={(e) => setFilters({ ...filters, startDate: e.target.value || undefined })}
+            className="px-3 py-2 border rounded-lg"
+          />
+          <div className="flex gap-2">
             <input
               type="date"
-              value={formData.savingDate}
-              onChange={(e) => setFormData({ ...formData, savingDate: e.target.value })}
-              className="px-3 py-2 border rounded"
-              required
+              placeholder="End Date"
+              value={filters.endDate || ''}
+              onChange={(e) => setFilters({ ...filters, endDate: e.target.value || undefined })}
+              className="px-3 py-2 border rounded-lg flex-1"
             />
-            <input
-              type="text"
-              placeholder="Saving Place"
-              value={formData.savingPlace}
-              onChange={(e) => setFormData({ ...formData, savingPlace: e.target.value })}
-              className="px-3 py-2 border rounded"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Reason (optional)"
-              value={formData.reason || ''}
-              onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-              className="px-3 py-2 border rounded"
-            />
+            <button
+              onClick={clearFilters}
+              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+            >
+              Clear
+            </button>
           </div>
-          <button
-            type="submit"
-            className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-          >
-            Save Saving
-          </button>
-        </form>
+        </div>
+      </div>
+
+      {/* Create Form */}
+      {showForm && (
+        <div className="mb-6 p-6 bg-white rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4">Create New Saving</h2>
+          <form onSubmit={handleCreateSaving} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.amount || ''}
+                  onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+                <input
+                  type="text"
+                  value={formData.currencyCode}
+                  onChange={(e) => setFormData({ ...formData, currencyCode: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Saving Date</label>
+                <input
+                  type="date"
+                  value={formData.savingDate}
+                  onChange={(e) => setFormData({ ...formData, savingDate: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Saving Place</label>
+                <input
+                  type="text"
+                  placeholder="Where is this saved?"
+                  value={formData.savingPlace}
+                  onChange={(e) => setFormData({ ...formData, savingPlace: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  required
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Reason (optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Why are you saving this?"
+                  value={formData.reason || ''}
+                  onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg"
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+            >
+              Create Saving
+            </button>
+          </form>
+        </div>
       )}
 
+      {/* Savings Table */}
       {loading ? (
-        <p>Loading savings...</p>
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600">Loading savings...</p>
+        </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse border border-gray-300">
-            <thead className="bg-gray-200">
-              <tr>
-                <th className="border px-4 py-2">ID</th>
-                <th className="border px-4 py-2">Saver ID</th>
-                <th className="border px-4 py-2">Amount</th>
-                <th className="border px-4 py-2">Currency</th>
-                <th className="border px-4 py-2">Saving Date</th>
-                <th className="border px-4 py-2">Saving Place</th>
-                <th className="border px-4 py-2">Reason</th>
-                <th className="border px-4 py-2">Status</th>
-                <th className="border px-4 py-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {savings.length === 0 ? (
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-100">
                 <tr>
-                  <td colSpan={9} className="border px-4 py-2 text-center">
-                    No savings found
-                  </td>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Currency
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Place
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Reason
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              ) : (
-                savings.map((saving) => (
-                  <tr key={saving.id} className="hover:bg-gray-50">
-                    <td className="border px-4 py-2">{saving.id}</td>
-                    <td className="border px-4 py-2">{saving.saverId}</td>
-                    <td className="border px-4 py-2">{saving.amount}</td>
-                    <td className="border px-4 py-2">{saving.currencyCode}</td>
-                    <td className="border px-4 py-2">{saving.savingDate}</td>
-                    <td className="border px-4 py-2">{saving.savingPlace}</td>
-                    <td className="border px-4 py-2">{saving.reason || '-'}</td>
-                    <td className="border px-4 py-2">
-                      <select
-                        value={saving.status}
-                        onChange={(e) => handleUpdateStatus(saving.id, e.target.value)}
-                        className="px-2 py-1 border rounded"
-                      >
-                        <option value="active">Active</option>
-                        <option value="withdrawn">Withdrawn</option>
-                        <option value="lost">Lost</option>
-                        <option value="transferred">Transferred</option>
-                      </select>
-                    </td>
-                    <td className="border px-4 py-2">
-                      <button
-                        onClick={() => handleDeleteSaving(saving.id)}
-                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
-                      >
-                        Delete
-                      </button>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {savings.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                      No savings found
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  savings.map((saving) => (
+                    <tr key={saving.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {saving.amount}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {saving.currencyCode}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(saving.savingDate).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500">{saving.savingPlace}</td>
+                      <td className="px-6 py-4 text-sm text-gray-500">{saving.reason || '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <select
+                          value={saving.status}
+                          onChange={(e) => handleUpdateStatus(saving.id, e.target.value as SavingStatus)}
+                          className="px-3 py-1 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="active">Active</option>
+                          <option value="withdrawn">Withdrawn</option>
+                          <option value="lost">Lost</option>
+                          <option value="transferred">Transferred</option>
+                        </select>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <button
+                          onClick={() => handleDeleteSaving(saving.id)}
+                          className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

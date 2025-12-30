@@ -28,4 +28,21 @@ export class UsersService {
     const { password, ...rest } = user;
     return rest;
   }
+
+  async findAll() {
+    return this.prisma.user.findMany({
+      where: {
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        email: true,
+        fullname: true,
+        username: true,
+      },
+      orderBy: {
+        email: 'asc',
+      },
+    });
+  }
 }

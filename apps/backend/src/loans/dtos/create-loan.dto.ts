@@ -1,22 +1,24 @@
-/* eslint-disable prettier/prettier */
 import { IsInt, IsOptional, IsPositive, IsString, IsDateString } from 'class-validator';
 
 export class CreateLoanDto {
+  @IsOptional()
   @IsInt()
-  loanerId!: number;
+  loanerId?: number;
+
   @IsInt()
   borrowerId!: number;
 
   @IsPositive()
   amount!: number;
+
   @IsString()
   currencyCode!: string;
 
   @IsDateString()
-  borrowingDate!: Date;
+  borrowingDate!: string;
 
   @IsDateString()
-  dueDate!: Date;
+  dueDate!: string;
 
   @IsOptional()
   @IsInt()

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { useAuth } from '../lib/auth';
 
 export default function Login() {
   const [email, setEmail] = useState('alice@example.com');
@@ -8,31 +9,20 @@ export default function Login() {
   const [msg, setMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  const { login } = useAuth();
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setIsLoading(true);
     setMsg('Logging in...');
     try {
-      const res = await fetch(`${apiUrl}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include', // important so browser sends/receives cookies
-      });
-      const body = await res.json();
-      document.cookie = body.cookie;
-      localStorage.setItem('accessToken', body.cookie.split('=')[1]);
-      if (res.ok) {
-        setMsg('Logged in successfully!');
-        setTimeout(() => router.push('/dashboard'), 1000);
-      } else {
-        setMsg(body?.message || 'Login failed');
-      }
+      await login(email, password);
+      setMsg('Logged in successfully!');
+      setTimeout(() => router.push('/dashboard'), 500);
     } catch (err) {
-      console.error(err);
-      setMsg('Network error');
+      const errorMessage = err instanceof Error ? err.message : 'Login failed';
+      setMsg(errorMessage);
+      console.error('Login error:', err);
     } finally {
       setIsLoading(false);
     }

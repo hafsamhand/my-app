@@ -1,18 +1,19 @@
-import { IsInt, IsPositive, IsString, IsDateString } from 'class-validator';
+import { IsInt, IsOptional, IsPositive, IsString, IsDateString } from 'class-validator';
 
 export class CreateSpendingDto {
+  @IsOptional()
   @IsInt()
-  spenderId: number;
+  spenderId?: number;
 
   @IsPositive()
-  amount: number;
+  amount!: number;
 
   @IsString()
-  currencyCode: string;
+  currencyCode!: string;
 
   @IsDateString()
-  spendingDate: string;
+  spendingDate!: string;
 
   @IsString()
-  spentOn: string;
+  spentOn!: string;
 }

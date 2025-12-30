@@ -1,24 +1,25 @@
-import { IsInt, IsPositive, IsString, IsDateString, IsOptional } from 'class-validator';
+import { IsInt, IsOptional, IsPositive, IsString, IsDateString } from 'class-validator';
 
 export class CreateSavingDto {
+  @IsOptional()
   @IsInt()
-  saverId: number;
+  saverId?: number;
 
   @IsPositive()
-  amount: number;
+  amount!: number;
 
   @IsString()
-  currencyCode: string;
+  currencyCode!: string;
 
   @IsDateString()
-  savingDate: string;
+  savingDate!: string;
 
   @IsOptional()
   @IsString()
   reason?: string;
 
   @IsString()
-  savingPlace: string;
+  savingPlace!: string;
 
   @IsOptional()
   @IsString()

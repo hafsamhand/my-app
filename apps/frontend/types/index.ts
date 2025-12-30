@@ -22,8 +22,8 @@ export interface Loan {
 }
 
 export interface CreateLoanInput {
-  loanerId: number;
-  borrowerId: number;
+  loanerId?: number; // Optional, defaults to authenticated user
+  borrowerId: number; // Required, must be different from loaner
   amount: number;
   currencyCode: string;
   borrowingDate: string;

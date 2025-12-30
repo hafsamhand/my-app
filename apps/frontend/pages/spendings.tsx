@@ -1,30 +1,47 @@
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { useAuth } from '../lib/auth';
 import { spendingsApi } from '../lib/api';
 import type { Spending, CreateSpendingInput } from '../types';
 
 export default function SpendingsPage() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [spendings, setSpendings] = useState<Spending[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [filters, setFilters] = useState<{
+    currencyCode?: string;
+    startDate?: string;
+    endDate?: string;
+    spentOn?: string;
+  }>({});
   const [formData, setFormData] = useState<CreateSpendingInput>({
-    spenderId: 1,
     amount: 0,
     currencyCode: 'USD',
     spendingDate: '',
     spentOn: '',
   });
 
-  // Fetch all spendings on mount
   useEffect(() => {
+    if (authLoading) {
+      return; // Wait for auth to finish loading
+    }
+
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
     fetchSpendings();
-  }, []);
+  }, [user, authLoading, router, filters]);
 
   const fetchSpendings = async () => {
     try {
       setLoading(true);
       setError('');
-      const data = await spendingsApi.findAll();
+      const data = await spendingsApi.findAll(filters);
       setSpendings(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch spendings');
@@ -38,9 +55,8 @@ export default function SpendingsPage() {
     try {
       setError('');
       const newSpending = await spendingsApi.create(formData);
-      setSpendings([...spendings, newSpending]);
+      setSpendings([newSpending, ...spendings]);
       setFormData({
-        spenderId: 1,
         amount: 0,
         currencyCode: 'USD',
         spendingDate: '',
@@ -51,6 +67,20 @@ export default function SpendingsPage() {
       setError(err instanceof Error ? err.message : 'Failed to create spending');
     }
   };
+
+  const clearFilters = () => {
+    setFilters({});
+  };
+
+  if (authLoading) {
+    return (
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
 
   const handleDeleteSpending = async (id: number) => {
     if (!confirm('Delete this spending?')) return;
@@ -64,124 +94,188 @@ export default function SpendingsPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <h1 className="text-4xl font-bold mb-6">Spendings Management</h1>
+    <div className="max-w-7xl mx-auto p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-4xl font-bold">Spendings Management</h1>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+        >
+          {showForm ? 'Cancel' : '+ Create Spending'}
+        </button>
+      </div>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
           {error}
         </div>
       )}
 
-      <button
-        onClick={() => setShowForm(!showForm)}
-        className="mb-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-      >
-        {showForm ? 'Cancel' : 'Create Spending'}
-      </button>
-
-      {showForm && (
-        <form onSubmit={handleCreateSpending} className="mb-6 p-4 bg-gray-100 rounded">
-          <div className="grid grid-cols-2 gap-4">
-            <input
-              type="number"
-              placeholder="Spender ID"
-              value={formData.spenderId}
-              onChange={(e) => setFormData({ ...formData, spenderId: Number(e.target.value) })}
-              className="px-3 py-2 border rounded"
-              required
-            />
-            <input
-              type="number"
-              placeholder="Amount"
-              step="0.01"
-              value={formData.amount}
-              onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
-              className="px-3 py-2 border rounded"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Currency Code"
-              value={formData.currencyCode}
-              onChange={(e) => setFormData({ ...formData, currencyCode: e.target.value })}
-              className="px-3 py-2 border rounded"
-              required
-            />
+      {/* Filters */}
+      <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+        <h3 className="text-lg font-semibold mb-3">Filters</h3>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <input
+            type="text"
+            placeholder="Currency Code"
+            value={filters.currencyCode || ''}
+            onChange={(e) => setFilters({ ...filters, currencyCode: e.target.value || undefined })}
+            className="px-3 py-2 border rounded-lg"
+          />
+          <input
+            type="text"
+            placeholder="Spent On"
+            value={filters.spentOn || ''}
+            onChange={(e) => setFilters({ ...filters, spentOn: e.target.value || undefined })}
+            className="px-3 py-2 border rounded-lg"
+          />
+          <input
+            type="date"
+            placeholder="Start Date"
+            value={filters.startDate || ''}
+            onChange={(e) => setFilters({ ...filters, startDate: e.target.value || undefined })}
+            className="px-3 py-2 border rounded-lg"
+          />
+          <div className="flex gap-2">
             <input
               type="date"
-              value={formData.spendingDate}
-              onChange={(e) => setFormData({ ...formData, spendingDate: e.target.value })}
-              className="px-3 py-2 border rounded"
-              required
+              placeholder="End Date"
+              value={filters.endDate || ''}
+              onChange={(e) => setFilters({ ...filters, endDate: e.target.value || undefined })}
+              className="px-3 py-2 border rounded-lg flex-1"
             />
-            <input
-              type="text"
-              placeholder="Spent On"
-              value={formData.spentOn}
-              onChange={(e) => setFormData({ ...formData, spentOn: e.target.value })}
-              className="px-3 py-2 border rounded col-span-2"
-              required
-            />
+            <button
+              onClick={clearFilters}
+              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+            >
+              Clear
+            </button>
           </div>
-          <button
-            type="submit"
-            className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-          >
-            Save Spending
-          </button>
-        </form>
+        </div>
+      </div>
+
+      {/* Create Form */}
+      {showForm && (
+        <div className="mb-6 p-6 bg-white rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4">Create New Spending</h2>
+          <form onSubmit={handleCreateSpending} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.amount || ''}
+                  onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+                <input
+                  type="text"
+                  value={formData.currencyCode}
+                  onChange={(e) => setFormData({ ...formData, currencyCode: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Spending Date</label>
+                <input
+                  type="date"
+                  value={formData.spendingDate}
+                  onChange={(e) => setFormData({ ...formData, spendingDate: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Spent On</label>
+                <input
+                  type="text"
+                  placeholder="What did you spend on?"
+                  value={formData.spentOn}
+                  onChange={(e) => setFormData({ ...formData, spentOn: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  required
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+            >
+              Create Spending
+            </button>
+          </form>
+        </div>
       )}
 
+      {/* Spendings Table */}
       {loading ? (
-        <p>Loading spendings...</p>
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600">Loading spendings...</p>
+        </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse border border-gray-300">
-            <thead className="bg-gray-200">
-              <tr>
-                <th className="border px-4 py-2">ID</th>
-                <th className="border px-4 py-2">Spender ID</th>
-                <th className="border px-4 py-2">Amount</th>
-                <th className="border px-4 py-2">Currency</th>
-                <th className="border px-4 py-2">Spending Date</th>
-                <th className="border px-4 py-2">Spent On</th>
-                <th className="border px-4 py-2">Created At</th>
-                <th className="border px-4 py-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {spendings.length === 0 ? (
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-100">
                 <tr>
-                  <td colSpan={8} className="border px-4 py-2 text-center">
-                    No spendings found
-                  </td>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Currency
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Spent On
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              ) : (
-                spendings.map((spending) => (
-                  <tr key={spending.id} className="hover:bg-gray-50">
-                    <td className="border px-4 py-2">{spending.id}</td>
-                    <td className="border px-4 py-2">{spending.spenderId}</td>
-                    <td className="border px-4 py-2">{spending.amount}</td>
-                    <td className="border px-4 py-2">{spending.currencyCode}</td>
-                    <td className="border px-4 py-2">{spending.spendingDate}</td>
-                    <td className="border px-4 py-2">{spending.spentOn}</td>
-                    <td className="border px-4 py-2 text-sm">
-                      {new Date(spending.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="border px-4 py-2">
-                      <button
-                        onClick={() => handleDeleteSpending(spending.id)}
-                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
-                      >
-                        Delete
-                      </button>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {spendings.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                      No spendings found
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  spendings.map((spending) => (
+                    <tr key={spending.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {spending.amount}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {spending.currencyCode}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(spending.spendingDate).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500">{spending.spentOn}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <button
+                          onClick={() => handleDeleteSpending(spending.id)}
+                          className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
