@@ -5,6 +5,7 @@ import Link from 'next/link';
 export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullname, setFullname] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [msg, setMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +33,7 @@ export default function Register() {
       const res = await fetch(`${apiUrl}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, fullname }),
         credentials: 'include',
       });
       const body = await res.json();
@@ -63,6 +64,20 @@ export default function Register() {
         {/* Register Form */}
         <div className="bg-white shadow-lg rounded-lg p-8">
           <form onSubmit={submit} className="space-y-6">
+            <div>
+              <label htmlFor="fullname" className="block text-sm font-medium text-gray-700 mb-2">
+                Full Name
+              </label>
+              <input
+                id="fullname"
+                type="text"
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="Enter your full name"
+                value={fullname}
+                onChange={(e) => setFullname(e.target.value)}
+              />
+            </div>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 Email Address

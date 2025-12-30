@@ -9,7 +9,7 @@ export class UsersController {
 
   @Post('register')
   async register(@Body() dto: RegisterDto) {
-    const user = await this.usersService.createUser(dto.email, dto.password);
+    const user = await this.usersService.createUser(dto.email, dto.password, dto.fullname);
     return { id: user.id, email: user.email, createdAt: user.createdAt };
   }
 

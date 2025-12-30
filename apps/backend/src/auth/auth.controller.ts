@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Res, Req, HttpCode, Get } from '@nestjs/common';
+import { Body, Controller, Post, Res, Req, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dtos/login.dto';
 import { RegisterDto } from './dtos/register.dto';
@@ -11,7 +11,7 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() dto: RegisterDto) {
-    const user = await this.usersService.createUser(dto.email, dto.password);
+    const user = await this.usersService.createUser(dto.email, dto.password, dto.fullname);
     return { id: user.id, email: user.email };
   }
 
@@ -50,12 +50,12 @@ export class AuthController {
     // simple endpoint to check cookie-based auth on backend side
     const cookieName = process.env.COOKIE_NAME || 'jid';
     let token = req.cookies?.[cookieName];
-    
+
     // Also check Authorization header
     if (!token && req.headers?.authorization?.startsWith('Bearer ')) {
       token = req.headers.authorization.split(' ')[1];
     }
-    
+
     if (!token) return { user: null };
     try {
       const payload = this.authService.verifyToken(token);

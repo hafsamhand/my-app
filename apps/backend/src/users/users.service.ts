@@ -7,10 +7,11 @@ import type { User } from '@prisma/client';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async createUser(email: string, password: string): Promise<User> {
+  async createUser(email: string, password: string, fullname: string): Promise<User> {
     const hash = await bcrypt.hash(password, 10);
+    console.log(fullname);
     return this.prisma.user.create({
-      data: { email, password: hash },
+      data: { email, password: hash, fullname, username: email },
     });
   }
 
