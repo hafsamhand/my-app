@@ -174,22 +174,38 @@ export class SpendingsService {
       }),
     ]);
 
+    // Helper to convert Decimal to number
+    const toNumber = (value: unknown): number => {
+      if (value === null || value === undefined) return 0;
+      if (typeof value === 'number') return value;
+      if (typeof value === 'bigint') return Number(value);
+      // Prisma Decimal type
+      if (typeof value === 'object' && 'toNumber' in value) {
+        return (value as { toNumber: () => number }).toNumber();
+      }
+      return Number(value);
+    };
+
     return {
       total: {
-        amount: total._sum.amount || 0,
+        amount: toNumber(total._sum.amount),
         count: total._count,
-        average: total._avg.amount || 0,
+        average: toNumber(total._avg.amount),
       },
       byCurrency: byCurrency.map((item) => ({
         currencyCode: item.currencyCode,
         count: item._count,
-        totalAmount: item._sum.amount || 0,
+        totalAmount: toNumber(item._sum.amount),
       })),
-      byMonth: byMonth,
+      byMonth: byMonth.map((item) => ({
+        month: item.month,
+        total: toNumber(item.total),
+        count: Number(item.count),
+      })),
       topCategories: topCategories.map((item) => ({
         category: item.spentOn,
         count: item._count,
-        totalAmount: item._sum.amount || 0,
+        totalAmount: toNumber(item._sum.amount),
       })),
     };
   }

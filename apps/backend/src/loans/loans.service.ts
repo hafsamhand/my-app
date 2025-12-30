@@ -201,24 +201,36 @@ export class LoansService {
       }),
     ]);
 
+    // Helper to convert Decimal to number
+    const toNumber = (value: unknown): number => {
+      if (value === null || value === undefined) return 0;
+      if (typeof value === 'number') return value;
+      if (typeof value === 'bigint') return Number(value);
+      // Prisma Decimal type
+      if (typeof value === 'object' && 'toNumber' in value) {
+        return (value as { toNumber: () => number }).toNumber();
+      }
+      return Number(value);
+    };
+
     return {
       asLoaner: {
-        totalAmount: totalAsLoaner._sum.amount || 0,
+        totalAmount: toNumber(totalAsLoaner._sum.amount),
         count: totalAsLoaner._count,
       },
       asBorrower: {
-        totalAmount: totalAsBorrower._sum.amount || 0,
+        totalAmount: toNumber(totalAsBorrower._sum.amount),
         count: totalAsBorrower._count,
       },
       byStatus: byStatus.map((item) => ({
         status: item.status,
         count: item._count,
-        totalAmount: item._sum.amount || 0,
+        totalAmount: toNumber(item._sum.amount),
       })),
       byCurrency: byCurrency.map((item) => ({
         currencyCode: item.currencyCode,
         count: item._count,
-        totalAmount: item._sum.amount || 0,
+        totalAmount: toNumber(item._sum.amount),
       })),
       overdueCount,
     };
