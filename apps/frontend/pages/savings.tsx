@@ -105,12 +105,12 @@ export default function SavingsPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-4xl font-bold">Savings Management</h1>
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">Savings Management</h1>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-base"
         >
           {showForm ? 'Cancel' : '+ Create Saving'}
         </button>
@@ -123,9 +123,9 @@ export default function SavingsPage() {
       )}
 
       {/* Filters */}
-      <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-        <h3 className="text-lg font-semibold mb-3">Filters</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="mb-6 p-4 sm:p-6 bg-gray-50 rounded-lg">
+        <h3 className="text-lg font-semibold mb-3 text-gray-800">Filters</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <select
             value={filters.status || ''}
             onChange={(e) =>
@@ -251,28 +251,28 @@ export default function SavingsPage() {
       ) : (
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[800px]">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                     Amount
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                     Currency
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                     Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                     Place
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                     Reason
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -280,29 +280,29 @@ export default function SavingsPage() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {savings.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                    <td colSpan={7} className="px-6 py-8 text-center text-gray-500 text-base">
                       No savings found
                     </td>
                   </tr>
                 ) : (
                   savings.map((saving) => (
                     <tr key={saving.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-3 sm:px-6 py-4 text-sm font-medium text-gray-900">
                         {saving.amount}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-3 sm:px-6 py-4 text-sm text-gray-700">
                         {saving.currencyCode}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-3 sm:px-6 py-4 text-sm text-gray-700">
                         {new Date(saving.savingDate).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">{saving.savingPlace}</td>
-                      <td className="px-6 py-4 text-sm text-gray-500">{saving.reason || '-'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 sm:px-6 py-4 text-sm text-gray-700">{saving.savingPlace}</td>
+                      <td className="px-3 sm:px-6 py-4 text-sm text-gray-700">{saving.reason || '-'}</td>
+                      <td className="px-3 sm:px-6 py-4">
                         <select
                           value={saving.status}
                           onChange={(e) => handleUpdateStatus(saving.id, e.target.value as SavingStatus)}
-                          className="px-3 py-1 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full sm:w-auto px-2 sm:px-3 py-1 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                           <option value="active">Active</option>
                           <option value="withdrawn">Withdrawn</option>
@@ -310,10 +310,10 @@ export default function SavingsPage() {
                           <option value="transferred">Transferred</option>
                         </select>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <td className="px-3 sm:px-6 py-4 text-sm">
                         <button
                           onClick={() => handleDeleteSaving(saving.id)}
-                          className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                          className="w-full sm:w-auto px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
                         >
                           Delete
                         </button>

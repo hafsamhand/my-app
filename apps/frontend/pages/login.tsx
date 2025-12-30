@@ -29,12 +29,12 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-6 sm:space-y-8">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-          <p className="text-lg text-gray-600">Sign in to your account</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+          <p className="text-base sm:text-lg text-gray-600">Sign in to your account</p>
         </div>
 
         {/* Login Form */}
