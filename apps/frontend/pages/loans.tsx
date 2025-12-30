@@ -319,7 +319,10 @@ export default function LoansPage() {
                   loans.map((loan: any) => (
                     <tr key={loan.id} className="hover:bg-gray-50">
                       <td className="px-3 sm:px-6 py-4 text-sm font-medium text-gray-900">
-                        {loan.borrower?.fullname || loan.borrower?.username || loan.borrower?.email || 'N/A'}
+                        {loan.borrower?.fullname ||
+                          loan.borrower?.username ||
+                          loan.borrower?.email ||
+                          'N/A'}
                       </td>
                       <td className="px-3 sm:px-6 py-4 text-sm font-medium text-gray-900">
                         {loan.amount}
