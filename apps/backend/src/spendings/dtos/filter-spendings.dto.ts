@@ -18,3 +18,5 @@ export class FilterSpendingsDto {
   spentOn?: string;
 }
 
+
+
