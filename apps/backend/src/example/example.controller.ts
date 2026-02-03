@@ -9,12 +9,18 @@ interface JwtUser {
   roles?: string[];
 }
 
-@Controller('api/example')
+@Controller('api')
 export class ExampleController {
   @UseGuards(AuthGuard('jwt'))
   @Get('protected')
   getProtected(@Req() req: Request & { user?: JwtUser }) {
     const user = req.user;
     return { message: 'Protected data', user, secretData: '42' };
+  }
+  @UseGuards(AuthGuard('jwt'))
+  @Get('public')
+  getPublic(@Req() req: Request & { user?: JwtUser }) {
+    const user = req.user;
+    return { message: 'Public data', user };
   }
 }

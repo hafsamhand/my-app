@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Res, Req, HttpCode, Get } from '@nestjs/common';
+import { Body, Controller, Post, Res, Req, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dtos/login.dto';
 import { RegisterDto } from './dtos/register.dto';
@@ -11,15 +11,15 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() dto: RegisterDto) {
-    const user = await this.usersService.createUser(dto.email, dto.password);
+    const user = await this.usersService.createUser(dto.email, dto.password, dto.fullname);
     return { id: user.id, email: user.email };
   }
 
-  @HttpCode(200)
   @Post('login')
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const user = await this.authService.validateUser(dto.email, dto.password);
     if (!user) {
+      res.status(401);
       return { status: 'error', message: 'Invalid credentials' };
     }
 
@@ -33,7 +33,9 @@ export class AuthController {
       sameSite: 'lax',
       maxAge: 1000 * 60 * 60, // 1 hour
     });
-    return { status: 'ok', cookie: res.getHeader('Set-Cookie'), user };
+    // Return token in response for localStorage (in addition to HttpOnly cookie)
+    // This allows the frontend to store it for Authorization header
+    return { status: 'ok', token, user };
   }
 
   @Post('logout')
@@ -47,7 +49,13 @@ export class AuthController {
   async me(@Req() req: Request) {
     // simple endpoint to check cookie-based auth on backend side
     const cookieName = process.env.COOKIE_NAME || 'jid';
-    const token = req.cookies[cookieName];
+    let token = req.cookies?.[cookieName];
+
+    // Also check Authorization header
+    if (!token && req.headers?.authorization?.startsWith('Bearer ')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+
     if (!token) return { user: null };
     try {
       const payload = this.authService.verifyToken(token);
